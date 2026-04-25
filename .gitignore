@@ -1,0 +1,7 @@
+node_modules/
+dist/
+design_extracted/
+.claude/
+.env
+.env.local
+*.local
