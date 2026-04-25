@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alma Café — Especialidad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --espresso: #120b07;
+      --dark-roast: #1e1009;
+      --mid-roast: #2e1a0e;
+      --cream: #f5ede0;
+      --warm-white: #fdf8f2;
+      --muted: #b09880;
+      --gold: oklch(0.72 0.10 58);
+      --gold-light: oklch(0.85 0.08 58);
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --sans: 'Space Grotesk', system-ui, sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--espresso);
+      color: var(--cream);
+      font-family: var(--sans);
+      overflow-x: hidden;
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--espresso); }
+    ::-webkit-scrollbar-thumb { background: var(--mid-roast); border-radius: 3px; }
+
+    /* NAV */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 20px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background 0.4s, padding 0.4s, backdrop-filter 0.4s;
+    }
+    .nav.scrolled {
+      background: rgba(18,11,7,0.92);
+      backdrop-filter: blur(16px);
+      padding: 14px 40px;
+      border-bottom: 1px solid rgba(176,152,128,0.15);
+    }
+    .nav-logo { font-family: var(--serif); font-size: 1.4rem; letter-spacing: 0.05em; color: var(--cream); text-decoration: none; }
+    .nav-logo span { color: var(--gold); }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a { color: var(--muted); font-size: 0.85rem; text-decoration: none; letter-spacing: 0.08em; text-transform: uppercase; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--cream); }
+    .nav-cta {
+      background: var(--gold); color: var(--espresso); border: none; cursor: pointer;
+      padding: 10px 22px; font-family: var(--sans); font-size: 0.82rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.88; transform: translateY(-1px); }
+    .nav-mobile-btn { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; }
+    .nav-mobile-btn span { display: block; width: 24px; height: 1.5px; background: var(--cream); transition: all 0.3s; }
+
+    /* HERO */
+    .hero {
+      position: relative; height: 100svh; min-height: 600px;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .hero-slide {
+      position: absolute; inset: 0;
+      background-size: cover; background-position: center;
+      transition: opacity 1.2s ease-in-out;
+    }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(18,11,7,0.55) 0%, rgba(18,11,7,0.3) 40%, rgba(18,11,7,0.8) 100%);
+    }
+    .hero-content {
+      position: relative; z-index: 2; text-align: center;
+      padding: 0 24px; max-width: 800px;
+    }
+    .hero-label {
+      font-size: 0.75rem; letter-spacing: 0.25em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 20px; display: block;
+    }
+    .hero-title {
+      font-family: var(--serif); font-size: clamp(3rem, 8vw, 6.5rem);
+      line-height: 1.05; color: var(--cream); margin-bottom: 20px;
+      text-shadow: 0 4px 40px rgba(0,0,0,0.5);
+    }
+    .hero-title em { font-style: italic; color: var(--gold-light); }
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.2rem); color: rgba(245,237,224,0.8);
+      font-weight: 300; margin-bottom: 40px; line-height: 1.6;
+    }
+    .hero-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--gold); color: var(--espresso); border: none; cursor: pointer;
+      padding: 16px 36px; font-family: var(--sans); font-size: 0.85rem; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase; border-radius: 2px;
+      transition: opacity 0.2s, transform 0.2s; text-decoration: none; display: inline-block;
+    }
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-2px); }
+    .btn-outline {
+      background: transparent; color: var(--cream); cursor: pointer;
+      padding: 15px 36px; font-family: var(--sans); font-size: 0.85rem; font-weight: 400;
+      letter-spacing: 0.12em; text-transform: uppercase; border-radius: 2px;
+      border: 1px solid rgba(245,237,224,0.5); transition: border-color 0.2s, color 0.2s;
+      text-decoration: none; display: inline-block;
+    }
+    .btn-outline:hover { border-color: var(--cream); color: var(--cream); }
+    .hero-dots { position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 3; }
+    .hero-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(245,237,224,0.3); cursor: pointer; transition: background 0.3s, width 0.3s; border: none; }
+    .hero-dot.active { background: var(--gold); width: 22px; border-radius: 3px; }
+    .hero-scroll-hint {
+      position: absolute; bottom: 36px; right: 40px; z-index: 3;
+      color: rgba(245,237,224,0.4); font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
+      writing-mode: vertical-rl; display: flex; align-items: center; gap: 10px;
+    }
+    .hero-scroll-hint::after {
+      content: ''; display: block; width: 1px; height: 40px; background: rgba(245,237,224,0.2);
+    }
+
+    /* QUICKINFO */
+    .quickinfo {
+      background: var(--mid-roast);
+      border-top: 1px solid rgba(176,152,128,0.15);
+      border-bottom: 1px solid rgba(176,152,128,0.15);
+    }
+    .quickinfo-inner {
+      max-width: 1100px; margin: 0 auto; padding: 0 24px;
+      display: grid; grid-template-columns: repeat(3, 1fr);
+    }
+    .qi-item {
+      padding: 28px 24px; display: flex; gap: 16px; align-items: center;
+      border-right: 1px solid rgba(176,152,128,0.12);
+    }
+    .qi-item:last-child { border-right: none; }
+    .qi-icon {
+      width: 42px; height: 42px; flex-shrink: 0;
+      background: rgba(176,152,128,0.12); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .qi-icon svg { stroke: var(--gold); }
+    .qi-label { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+    .qi-value { font-family: var(--serif); font-size: 1rem; color: var(--cream); line-height: 1.3; }
+
+    /* SECTION COMMON */
+    .section { padding: 100px 24px; max-width: 1200px; margin: 0 auto; }
+    .section-label { font-size: 0.72rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 14px; }
+    .section-title { font-family: var(--serif); font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1.15; color: var(--cream); }
+    .section-title em { font-style: italic; color: var(--gold-light); }
+    .section-sub { font-size: 1rem; color: var(--muted); line-height: 1.7; max-width: 520px; margin-top: 14px; font-weight: 300; }
+    .divider { width: 40px; height: 1px; background: var(--gold); margin: 24px 0; }
+
+    /* STORY / ABOUT */
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+    .about-img-wrap { position: relative; }
+    .about-img {
+      width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block;
+      border-radius: 2px;
+    }
+    .about-badge {
+      position: absolute; bottom: -24px; right: -24px;
+      width: 100px; height: 100px; border-radius: 50%;
+      background: var(--gold); color: var(--espresso);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-family: var(--serif); line-height: 1.1;
+    }
+    .about-badge .yr { font-size: 1.6rem; font-weight: 700; }
+    .about-badge .txt { font-size: 0.55rem; letter-spacing: 0.12em; text-transform: uppercase; text-align: center; }
+    .about-stats { display: flex; gap: 32px; margin-top: 40px; }
+    .stat-num { font-family: var(--serif); font-size: 2.5rem; color: var(--gold); display: block; }
+    .stat-desc { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.05em; }
+
+    /* MENU */
+    .menu-wrap { background: var(--dark-roast); }
+    .menu-tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(176,152,128,0.15); margin-bottom: 48px; }
+    .menu-tab {
+      padding: 12px 24px; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; border: none; background: none; color: var(--muted);
+      border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.2s, border-color 0.2s;
+      font-family: var(--sans);
+    }
+    .menu-tab.active { color: var(--cream); border-bottom-color: var(--gold); }
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; }
+    .menu-card {
+      background: var(--mid-roast); border-radius: 4px; overflow: hidden;
+      cursor: pointer; transition: transform 0.3s, box-shadow 0.3s; border: 1px solid rgba(176,152,128,0.08);
+    }
+    .menu-card:hover { transform: translateY(-6px); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+    .menu-card-img-wrap { overflow: hidden; height: 200px; }
+    .menu-card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; display: block; }
+    .menu-card:hover .menu-card-img { transform: scale(1.07); }
+    .menu-card-body { padding: 20px; }
+    .menu-card-tag { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); }
+    .menu-card-name { font-family: var(--serif); font-size: 1.2rem; color: var(--cream); margin: 6px 0 8px; }
+    .menu-card-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+    .menu-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
+    .menu-card-price { font-family: var(--serif); font-size: 1.3rem; color: var(--gold); }
+    .menu-card-btn {
+      background: none; border: 1px solid rgba(176,152,128,0.3); color: var(--muted);
+      padding: 7px 14px; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+      cursor: pointer; border-radius: 2px; transition: all 0.2s; font-family: var(--sans);
+    }
+    .menu-card-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* GALLERY */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .gallery-item { position: relative; aspect-ratio: 1; overflow: hidden; cursor: pointer; }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s; }
+    .gallery-item:hover img { transform: scale(1.05); }
+    .gallery-overlay {
+      position: absolute; inset: 0; background: rgba(18,11,7,0.55);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+    .gallery-overlay svg { stroke: white; }
+
+    /* TESTIMONIALS */
+    .testimonials-wrap { background: var(--dark-roast); }
+    .testimonials-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+    .testimonial-card { padding: 32px; background: var(--mid-roast); border-radius: 4px; border: 1px solid rgba(176,152,128,0.08); }
+    .stars { display: flex; gap: 3px; margin-bottom: 16px; }
+    .star { color: var(--gold); font-size: 0.9rem; }
+    .testimonial-text { font-family: var(--serif); font-style: italic; color: var(--cream); line-height: 1.7; margin-bottom: 20px; font-size: 1rem; }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+    .testimonial-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
+    .testimonial-name { font-size: 0.85rem; color: var(--cream); font-weight: 500; }
+    .testimonial-loc { font-size: 0.72rem; color: var(--muted); }
+
+    /* CTA BANNER */
+    .cta-banner {
+      position: relative; padding: 120px 24px;
+      background-size: cover; background-position: center; background-attachment: fixed;
+      text-align: center; overflow: hidden;
+    }
+    .cta-banner-overlay { position: absolute; inset: 0; background: rgba(18,11,7,0.78); }
+    .cta-banner-content { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; }
+    .cta-banner-title { font-family: var(--serif); font-size: clamp(2rem, 4vw, 3rem); color: var(--cream); margin-bottom: 16px; line-height: 1.2; }
+    .cta-banner-sub { color: var(--muted); font-size: 1rem; margin-bottom: 40px; line-height: 1.7; font-weight: 300; }
+
+    /* FOOTER */
+    footer { background: var(--espresso); border-top: 1px solid rgba(176,152,128,0.1); }
+    .footer-inner { max-width: 1200px; margin: 0 auto; padding: 64px 24px 40px; }
+    .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 48px; }
+    .footer-logo { font-family: var(--serif); font-size: 1.6rem; color: var(--cream); margin-bottom: 14px; }
+    .footer-logo span { color: var(--gold); }
+    .footer-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+    .footer-heading { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 18px; }
+    .footer-links { list-style: none; }
+    .footer-links li { margin-bottom: 10px; }
+    .footer-links a { font-size: 0.85rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--cream); }
+    .footer-bottom { border-top: 1px solid rgba(176,152,128,0.1); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; }
+    .footer-copy { font-size: 0.78rem; color: rgba(176,152,128,0.5); }
+    .social-links { display: flex; gap: 16px; }
+    .social-link {
+      width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(176,152,128,0.2);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted); text-decoration: none; transition: border-color 0.2s, color 0.2s;
+    }
+    .social-link:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* WHATSAPP FAB */
+    .wa-fab {
+      position: fixed; bottom: 32px; right: 32px; z-index: 200;
+      width: 58px; height: 58px; border-radius: 50%;
+      background: #25D366; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 24px rgba(37,211,102,0.4);
+      animation: wa-pulse 2.5s ease-in-out infinite;
+      text-decoration: none;
+    }
+    @keyframes wa-pulse {
+      0%, 100% { box-shadow: 0 4px 24px rgba(37,211,102,0.4); transform: scale(1); }
+      50% { box-shadow: 0 4px 40px rgba(37,211,102,0.7); transform: scale(1.06); }
+    }
+    .wa-fab:hover { animation: none; transform: scale(1.1); box-shadow: 0 8px 32px rgba(37,211,102,0.6); }
+    .wa-tooltip {
+      position: absolute; right: 70px; top: 50%; transform: translateY(-50%);
+      background: var(--mid-roast); color: var(--cream); padding: 8px 14px;
+      font-size: 0.78rem; white-space: nowrap; border-radius: 4px; pointer-events: none;
+      border: 1px solid rgba(176,152,128,0.15);
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .wa-fab:hover .wa-tooltip { opacity: 1; }
+
+    /* FADE ANIMATIONS */
+    .fade-up { opacity: 0; transform: translateY(40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+    .fade-up:nth-child(2) { transition-delay: 0.1s; }
+    .fade-up:nth-child(3) { transition-delay: 0.2s; }
+    .fade-up:nth-child(4) { transition-delay: 0.3s; }
+    .stagger-1 { transition-delay: 0s !important; }
+    .stagger-2 { transition-delay: 0.12s !important; }
+    .stagger-3 { transition-delay: 0.24s !important; }
+    .stagger-4 { transition-delay: 0.36s !important; }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .gallery-grid { grid-template-columns: repeat(3,1fr); }
+    }
+    @media (max-width: 768px) {
+      .nav-links, .nav-cta { display: none; }
+      .nav-mobile-btn { display: flex; }
+      .nav { padding: 16px 24px; }
+      .nav.scrolled { padding: 12px 24px; }
+      .about-grid { grid-template-columns: 1fr; gap: 48px; }
+      .about-badge { right: 0; }
+      .quickinfo-inner { grid-template-columns: 1fr; }
+      .qi-item { border-right: none; border-bottom: 1px solid rgba(176,152,128,0.12); }
+      .qi-item:last-child { border-bottom: none; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .gallery-grid { grid-template-columns: repeat(2,1fr); }
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+      .section { padding: 72px 24px; }
+      .hero-scroll-hint { display: none; }
+      .about-stats { flex-wrap: wrap; gap: 20px; }
+    }
+    @media (max-width: 480px) {
+      .menu-grid { grid-template-columns: 1fr; }
+      .gallery-grid { grid-template-columns: repeat(2,1fr); }
+    }
+
+    /* MOBILE NAV */
+    .mobile-nav {
+      position: fixed; inset: 0; z-index: 99;
+      background: var(--espresso); display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 36px;
+      transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+    .mobile-nav.open { transform: translateX(0); }
+    .mobile-nav a { font-family: var(--serif); font-size: 2rem; color: var(--cream); text-decoration: none; }
+    .mobile-nav a:hover { color: var(--gold); }
+    .mobile-close { position: absolute; top: 24px; right: 24px; background: none; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+/* ─── DATA ─── */
+const HERO_SLIDES = [
+  {
+    img: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=1800&auto=format&fit=crop&q=80",
+    title: "Alma",
+    titleItalic: "Café",
+    sub: "Donde cada taza es una historia que merece ser contada con calma."
+  },
+  {
+    img: "https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=1800&auto=format&fit=crop&q=80",
+    title: "Origen",
+    titleItalic: "y Ritual",
+    sub: "Granos de especialidad, tostado artesanal. El sabor empieza mucho antes de la primera sorba."
+  },
+  {
+    img: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=1800&auto=format&fit=crop&q=80",
+    title: "Un Lugar",
+    titleItalic: "para Volver",
+    sub: "Ambiente cálido, buen café y personas que aman lo que hacen."
+  }
+];
+
+const MENU_CATEGORIES = ["Cafés", "Fríos", "Pastelería", "Brunch"];
+
+const MENU_ITEMS = {
+  "Cafés": [
+    { id:1, name:"Flat White", tag:"Signature", desc:"Doble ristretto con leche vaporizada de micro-espuma. Intenso y sedoso.", price:"$3.200", img:"https://images.unsplash.com/photo-1561882468-9110e03e0f78?w=600&auto=format&fit=crop&q=80" },
+    { id:2, name:"Cortado de Avellana", tag:"Favorito", desc:"Espresso cortado con leche de avellanas y una nota caramelizada.", price:"$3.800", img:"https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&auto=format&fit=crop&q=80" },
+    { id:3, name:"Pour Over Etiopía", tag:"Origen Único", desc:"Notas frutales de arándano y flor de jazmín. Perfil claro y brillante.", price:"$4.500", img:"https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=600&auto=format&fit=crop&q=80" },
+    { id:4, name:"Espresso Clásico", tag:"Base", desc:"Blend house de tostado medio-oscuro. Cuerpo pleno, crema dorada.", price:"$1.900", img:"https://images.unsplash.com/photo-1520831861-9e2a50ab8bdd?w=600&auto=format&fit=crop&q=80" },
+  ],
+  "Fríos": [
+    { id:5, name:"Cold Brew 24h", tag:"Refrescante", desc:"Extracción en frío por 24 horas. Suave, sin amargor, con notas de chocolate.", price:"$3.500", img:"https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600&auto=format&fit=crop&q=80" },
+    { id:6, name:"Latte Tostado", tag:"Seasonal", desc:"Espresso sobre leche fría y jarabe de avena tostada. Irresistible.", price:"$4.200", img:"https://images.unsplash.com/photo-1544145945-f90425340c7e?w=600&auto=format&fit=crop&q=80" },
+    { id:7, name:"Matcha Latte", tag:"Sin Cafeína", desc:"Matcha ceremonial japonés con leche de almendras y miel de abeja.", price:"$4.800", img:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&auto=format&fit=crop&q=80" },
+    { id:8, name:"Agua Tónica de Café", tag:"Único", desc:"Espresso sobre agua tónica artesanal con cítricos. Refrescante y complejo.", price:"$4.500", img:"https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=600&auto=format&fit=crop&q=80" },
+  ],
+  "Pastelería": [
+    { id:9, name:"Roll de Canela", tag:"Horneado hoy", desc:"Masa brioche hojaldrada, canela mexicana, glasé de queso crema.", price:"$2.900", img:"https://images.unsplash.com/photo-1509365465985-25d11c17e812?w=600&auto=format&fit=crop&q=80" },
+    { id:10, name:"Croissant de Almendras", tag:"Artesanal", desc:"72 capas de mantequilla francesa, crema frangipane, almendras tostadas.", price:"$2.700", img:"https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&auto=format&fit=crop&q=80" },
+    { id:11, name:"Cheesecake de Miso", tag:"Chef's Pick", desc:"Base de galleta de sésamo, crema de queso con miso blanco y caramelo.", price:"$3.400", img:"https://images.unsplash.com/photo-1524351199678-941a58a3df50?w=600&auto=format&fit=crop&q=80" },
+    { id:12, name:"Tostada de Banana", tag:"Dulce", desc:"Pan de masa madre, mantequilla de nuez, plátano caramelizado y tahini.", price:"$3.100", img:"https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=600&auto=format&fit=crop&q=80" },
+  ],
+  "Brunch": [
+    { id:13, name:"Eggs Benedict", tag:"Clásico", desc:"Huevos poché sobre English muffin, jamón serrano y salsa holandesa.", price:"$7.800", img:"https://images.unsplash.com/photo-1608039829572-78524f79c4c7?w=600&auto=format&fit=crop&q=80" },
+    { id:14, name:"Tostada de Aguacate", tag:"Vegano", desc:"Masa madre, guacamole, pepitas tostadas, chile y limón de pica.", price:"$6.500", img:"https://images.unsplash.com/photo-1603046891744-1f15eb825b96?w=600&auto=format&fit=crop&q=80" },
+    { id:15, name:"Bowl de Granola", tag:"Ligero", desc:"Granola artesanal, yogur de cabra, frutas de temporada y miel.", price:"$5.900", img:"https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?w=600&auto=format&fit=crop&q=80" },
+    { id:16, name:"Pancakes de Ricotta", tag:"Signature", desc:"Esponjosos, con mantequilla café y maple real de Vermont.", price:"$7.500", img:"https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600&auto=format&fit=crop&q=80" },
+  ],
+};
+
+const GALLERY_IMGS = [
+  "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=500&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?w=500&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=500&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1507914997625-5eace7c85c80?w=500&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1504753793650-d4a2b783c15e?w=500&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1463797221720-6b07e6426c24?w=500&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1511081692775-05d0f180a065?w=500&auto=format&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1575386619241-b6b4f21d4d01?w=500&auto=format&fit=crop&q=80",
+];
+
+const TESTIMONIALS = [
+  { name:"Sofía M.", loc:"Cliente habitual", text:"El mejor flat white de la ciudad, sin duda. El ambiente es mágico y el equipo siempre está dispuesto a recomendar algo nuevo.", stars:5, avatar:"https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&auto=format&fit=crop&q=80" },
+  { name:"Rodrigo K.", loc:"Foodie & Blogger", text:"Vine por el café, me quedé por la pastelería. El croissant de almendras es un pecado capital que vale cada caloría.", stars:5, avatar:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&auto=format&fit=crop&q=80" },
+  { name:"Valentina C.", loc:"Trabaja desde aquí", text:"Oficina alternativa y café de especialidad. El pour over etiopía me hace arrancar el día de la mejor forma posible.", stars:5, avatar:"https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&auto=format&fit=crop&q=80" },
+];
+
+/* ─── HOOKS ─── */
+function useFadeUp(deps = []) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const targets = el.querySelectorAll ? [...el.querySelectorAll('.fade-up'), ...(el.classList.contains('fade-up') ? [el] : [])] : [];
+    const allTargets = el.classList && el.classList.contains('fade-up') ? [el, ...el.querySelectorAll('.fade-up')] : el.querySelectorAll ? el.querySelectorAll('.fade-up') : [];
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    allTargets.forEach(t => observer.observe(t));
+    return () => observer.disconnect();
+  }, deps);
+  return ref;
+}
+
+function useSectionFade() {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const targets = el.querySelectorAll('.fade-up');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+    targets.forEach(t => observer.observe(t));
+    return () => observer.disconnect();
+  });
+  return ref;
+}
+
+/* ─── NAV ─── */
+function Nav({ onMenuClick }) {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 60);
+    window.addEventListener('scroll', fn);
+    return () => window.removeEventListener('scroll', fn);
+  }, []);
+  const scrollTo = (id) => {
+    setMobileOpen(false);
+    const el = document.getElementById(id);
+    if (el) el.scrollTop; // just close menu, let href handle it
+  };
+  return (
+    <>
+      <nav className={`nav${scrolled ? ' scrolled' : ''}`}>
+        <a href="#hero" className="nav-logo">Alma<span>.</span></a>
+        <ul className="nav-links">
+          <li><a href="#about">Nosotros</a></li>
+          <li><a href="#menu">Menú</a></li>
+          <li><a href="#galeria">Galería</a></li>
+          <li><a href="#contacto">Contacto</a></li>
+        </ul>
+        <button className="nav-cta" onClick={() => document.getElementById('menu')?.scrollIntoView({block:'start'})}>Ver Menú</button>
+        <button className="nav-mobile-btn" onClick={() => setMobileOpen(true)} aria-label="Abrir menú">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+      <div className={`mobile-nav${mobileOpen ? ' open' : ''}`}>
+        <button className="mobile-close" onClick={() => setMobileOpen(false)} aria-label="Cerrar">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f5ede0" strokeWidth="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        {["about","menu","galeria","contacto"].map(id => (
+          <a key={id} href={`#${id}`} onClick={() => setMobileOpen(false)} style={{textTransform:'capitalize'}}>{id === 'about' ? 'Nosotros' : id === 'galeria' ? 'Galería' : id === 'contacto' ? 'Contacto' : 'Menú'}</a>
+        ))}
+      </div>
+    </>
+  );
+}
+
+/* ─── HERO ─── */
+function Hero() {
+  const [current, setCurrent] = useState(0);
+  const [prev, setPrev] = useState(null);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setPrev(current);
+      setCurrent(c => (c + 1) % HERO_SLIDES.length);
+    }, 5000);
+    return () => clearTimeout(t);
+  }, [current]);
+  return (
+    <section className="hero" id="hero">
+      {HERO_SLIDES.map((s, i) => (
+        <div key={i} className="hero-slide" style={{
+          backgroundImage: `url(${s.img})`,
+          opacity: i === current ? 1 : 0,
+          zIndex: i === current ? 1 : 0,
+        }}></div>
+      ))}
+      <div className="hero-overlay" style={{zIndex:2}}></div>
+      <div className="hero-content">
+        <span className="hero-label">Cafetería de Especialidad · Desde 2018</span>
+        <h1 className="hero-title">
+          {HERO_SLIDES[current].title} <em>{HERO_SLIDES[current].titleItalic}</em>
+        </h1>
+        <p className="hero-sub">{HERO_SLIDES[current].sub}</p>
+        <div className="hero-btns">
+          <a href="#menu" className="btn-primary">Ver Menú</a>
+          <a href="#about" className="btn-outline">Nuestra Historia</a>
+        </div>
+      </div>
+      <div className="hero-dots" style={{zIndex:3}}>
+        {HERO_SLIDES.map((_, i) => (
+          <button key={i} className={`hero-dot${i === current ? ' active' : ''}`} onClick={() => setCurrent(i)} aria-label={`Slide ${i+1}`}></button>
+        ))}
+      </div>
+      <div className="hero-scroll-hint">Scroll</div>
+    </section>
+  );
+}
+
+/* ─── QUICKINFO ─── */
+function QuickInfo() {
+  return (
+    <div className="quickinfo">
+      <div className="quickinfo-inner">
+        <div className="qi-item">
+          <div className="qi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" strokeWidth="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div>
+            <div className="qi-label">Horarios</div>
+            <div className="qi-value">Lun–Vie 7:30–20:00<br/>Sáb–Dom 8:00–21:00</div>
+          </div>
+        </div>
+        <div className="qi-item">
+          <div className="qi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" strokeWidth="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div>
+            <div className="qi-label">Ubicación</div>
+            <div className="qi-value">Av. Los Leones 1420<br/>Providencia, Santiago</div>
+          </div>
+        </div>
+        <div className="qi-item">
+          <div className="qi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" strokeWidth="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          </div>
+          <div>
+            <div className="qi-label">Ambiente</div>
+            <div className="qi-value">Pet Friendly 🐾<br/>WiFi · Mesas al exterior</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── ABOUT ─── */
+function About() {
+  const ref = useSectionFade();
+  return (
+    <section className="section" id="about" ref={ref}>
+      <div className="about-grid">
+        <div className="about-img-wrap fade-up">
+          <img className="about-img" src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=800&auto=format&fit=crop&q=80" alt="Barista preparando café" loading="lazy" />
+          <div className="about-badge">
+            <span className="yr">7+</span>
+            <span className="txt">años de pasión</span>
+          </div>
+        </div>
+        <div>
+          <span className="section-label fade-up">Nuestra Historia</span>
+          <h2 className="section-title fade-up">Café con <em>propósito</em>,<br/>servido con alma.</h2>
+          <div className="divider fade-up"></div>
+          <p className="section-sub fade-up">Nacimos en 2018 con una sola certeza: el café de especialidad merecía un espacio donde la calidad y la calidez coexistan sin compromiso.</p>
+          <p className="section-sub fade-up" style={{marginTop:'14px'}}>Trabajamos directamente con productores de origen en Colombia, Etiopía y Guatemala. Cada grano tiene nombre, historia y un terroir único que expresamos en cada preparación.</p>
+          <div className="about-stats fade-up">
+            <div>
+              <span className="stat-num">12</span>
+              <span className="stat-desc">Orígenes activos</span>
+            </div>
+            <div>
+              <span className="stat-num">4.9</span>
+              <span className="stat-desc">Rating promedio</span>
+            </div>
+            <div>
+              <span className="stat-num">300+</span>
+              <span className="stat-desc">Clientes/día</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── MENU ─── */
+function Menu() {
+  const [activeTab, setActiveTab] = useState("Cafés");
+  const ref = useSectionFade();
+  return (
+    <div className="menu-wrap" id="menu">
+      <div className="section" ref={ref} style={{maxWidth:'1200px'}}>
+        <span className="section-label fade-up">Lo que Servimos</span>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-end',flexWrap:'wrap',gap:'16px'}}>
+          <h2 className="section-title fade-up">Nuestro <em>Menú</em></h2>
+          <p className="fade-up" style={{fontSize:'0.82rem',color:'var(--muted)',letterSpacing:'0.05em'}}>Precios en pesos argentinos · incluye IVA</p>
+        </div>
+        <div className="divider fade-up"></div>
+        <div className="menu-tabs fade-up">
+          {MENU_CATEGORIES.map(cat => (
+            <button key={cat} className={`menu-tab${activeTab === cat ? ' active' : ''}`} onClick={() => setActiveTab(cat)}>{cat}</button>
+          ))}
+        </div>
+        <div className="menu-grid">
+          {MENU_ITEMS[activeTab].map((item, i) => (
+            <div key={item.id} className={`menu-card fade-up stagger-${(i % 4) + 1}`}>
+              <div className="menu-card-img-wrap">
+                <img className="menu-card-img" src={item.img} alt={item.name} loading="lazy" />
+              </div>
+              <div className="menu-card-body">
+                <span className="menu-card-tag">{item.tag}</span>
+                <h3 className="menu-card-name">{item.name}</h3>
+                <p className="menu-card-desc">{item.desc}</p>
+                <div className="menu-card-footer">
+                  <span className="menu-card-price">{item.price}</span>
+                  <button className="menu-card-btn">Pedir</button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── GALLERY ─── */
+function Gallery() {
+  const ref = useSectionFade();
+  return (
+    <section className="section" id="galeria" ref={ref} style={{paddingBottom:'0'}}>
+      <div style={{textAlign:'center',marginBottom:'48px'}}>
+        <span className="section-label fade-up">Síguenos</span>
+        <h2 className="section-title fade-up">@alma.cafe</h2>
+        <p className="section-sub fade-up" style={{margin:'12px auto 0',textAlign:'center'}}>Momentos que valen más que mil palabras. Y un buen café.</p>
+      </div>
+      <div className="gallery-grid">
+        {GALLERY_IMGS.map((src, i) => (
+          <div key={i} className={`gallery-item fade-up stagger-${(i % 4) + 1}`}>
+            <img src={src} alt={`Galería ${i+1}`} loading="lazy" />
+            <div className="gallery-overlay">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeWidth="1.5">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+              </svg>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ─── TESTIMONIALS ─── */
+function Testimonials() {
+  const ref = useSectionFade();
+  return (
+    <div className="testimonials-wrap">
+      <div className="section" ref={ref}>
+        <div style={{textAlign:'center',marginBottom:'48px'}}>
+          <span className="section-label fade-up">Lo que Dicen</span>
+          <h2 className="section-title fade-up">Voces que nos <em>inspiran</em></h2>
+        </div>
+        <div className="testimonials-grid">
+          {TESTIMONIALS.map((t, i) => (
+            <div key={i} className={`testimonial-card fade-up stagger-${i+1}`}>
+              <div className="stars">{Array(t.stars).fill(0).map((_, j) => <span key={j} className="star">★</span>)}</div>
+              <p className="testimonial-text">"{t.text}"</p>
+              <div className="testimonial-author">
+                <img className="testimonial-avatar" src={t.avatar} alt={t.name} loading="lazy" />
+                <div>
+                  <div className="testimonial-name">{t.name}</div>
+                  <div className="testimonial-loc">{t.loc}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── CTA BANNER ─── */
+function CTABanner() {
+  return (
+    <div className="cta-banner" style={{backgroundImage:'url(https://images.unsplash.com/photo-1498804103079-a6351b050096?w=1600&auto=format&fit=crop&q=80)'}}>
+      <div className="cta-banner-overlay"></div>
+      <div className="cta-banner-content">
+        <span className="section-label" style={{display:'block',marginBottom:'16px'}}>¿Listo para el próximo sorbo?</span>
+        <h2 className="cta-banner-title">Haz tu pedido o <em style={{fontStyle:'italic',color:'var(--gold-light)'}}>visítanos hoy</em></h2>
+        <p className="cta-banner-sub">Escríbenos por WhatsApp y te atendemos en minutos. También puedes reservar una mesa para el fin de semana.</p>
+        <div style={{display:'flex',gap:'16px',justifyContent:'center',flexWrap:'wrap'}}>
+          <a href="https://wa.me/56912345678?text=Hola!%20Quiero%20hacer%20un%20pedido" target="_blank" className="btn-primary" style={{display:'flex',alignItems:'center',gap:'10px'}}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Pedido por WhatsApp
+          </a>
+          <a href="#contacto" className="btn-outline">Reservar Mesa</a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── FOOTER ─── */
+function Footer() {
+  return (
+    <footer id="contacto">
+      <div className="footer-inner">
+        <div className="footer-grid">
+          <div>
+            <div className="footer-logo">Alma<span>.</span></div>
+            <p className="footer-desc">Cafetería de especialidad donde cada taza es preparada con intención y servida con cariño. Únete a nuestra comunidad de amantes del buen café.</p>
+            <div className="social-links" style={{marginTop:'24px'}}>
+              {['ig','fb','tw'].map(s => (
+                <a key={s} href="#" className="social-link">
+                  {s === 'ig' && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>}
+                  {s === 'fb' && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>}
+                  {s === 'tw' && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/></svg>}
+                </a>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="footer-heading">Menú</div>
+            <ul className="footer-links">
+              {MENU_CATEGORIES.map(c => <li key={c}><a href="#menu">{c}</a></li>)}
+            </ul>
+          </div>
+          <div>
+            <div className="footer-heading">Visítanos</div>
+            <ul className="footer-links">
+              <li><a href="#">Av. Los Leones 1420</a></li>
+              <li><a href="#">Providencia, Santiago</a></li>
+              <li><a href="#">+56 9 1234 5678</a></li>
+              <li><a href="#">hola@almacafe.cl</a></li>
+            </ul>
+          </div>
+          <div>
+            <div className="footer-heading">Horarios</div>
+            <ul className="footer-links">
+              <li><a href="#">Lun–Vie: 7:30 – 20:00</a></li>
+              <li><a href="#">Sáb: 8:00 – 21:00</a></li>
+              <li><a href="#">Dom: 8:00 – 20:00</a></li>
+              <li style={{marginTop:'12px'}}><a href="#" style={{color:'var(--gold)'}}>Reservar mesa →</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <span className="footer-copy">© 2026 Alma Café. Todos los derechos reservados.</span>
+          <span className="footer-copy">Hecho con ♥ y mucho café</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+/* ─── WHATSAPP FAB ─── */
+function WhatsAppFAB() {
+  return (
+    <a href="https://wa.me/56912345678?text=Hola!%20Quiero%20hacer%20un%20pedido%20en%20Alma%20Caf%C3%A9" target="_blank" className="wa-fab" aria-label="Pedir por WhatsApp">
+      <div className="wa-tooltip">¡Pide ahora!</div>
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="white">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      </svg>
+    </a>
+  );
+}
+
+/* ─── APP ─── */
+function App() {
+  return (
+    <>
+      <Nav />
+      <Hero />
+      <QuickInfo />
+      <About />
+      <Menu />
+      <Gallery />
+      <Testimonials />
+      <CTABanner />
+      <Footer />
+      <WhatsAppFAB />
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
