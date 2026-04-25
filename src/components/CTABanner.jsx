@@ -4,7 +4,7 @@ import WhatsAppIcon from './WhatsAppIcon'
 export default function CTABanner() {
   return (
     <div
-      className="relative py-[120px] px-6 text-center overflow-hidden bg-cover bg-center bg-fixed"
+      className="relative py-[120px] px-6 text-center overflow-hidden bg-cover bg-center bg-scroll md:bg-fixed"
       style={{
         backgroundImage:
           "url('https://images.unsplash.com/photo-1498804103079-a6351b050096?w=1600&auto=format&fit=crop&q=80')",

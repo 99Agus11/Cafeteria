@@ -43,12 +43,12 @@ export default function Menu() {
         <div className="fade-up w-10 h-px bg-gold my-6" />
 
         {/* Tabs */}
-        <div className="fade-up flex border-b border-muted/15 mb-12">
+        <div className="fade-up flex overflow-x-auto border-b border-muted/15 mb-12 -mx-6 px-6 md:mx-0 md:px-0 scrollbar-none">
           {MENU_CATEGORIES.map(cat => (
             <button
               key={cat}
               onClick={() => setActiveTab(cat)}
-              className={`px-6 py-3 text-[0.78rem] tracking-[0.1em] uppercase cursor-pointer border-0 bg-transparent font-sans transition-all duration-200 -mb-px border-b-2 ${
+              className={`flex-shrink-0 px-5 py-3 text-[0.78rem] tracking-[0.1em] uppercase cursor-pointer border-0 bg-transparent font-sans transition-all duration-200 -mb-px border-b-2 ${
                 activeTab === cat
                   ? 'text-cream border-gold'
                   : 'text-muted border-transparent hover:text-cream'

@@ -21,7 +21,7 @@ export default function About() {
   const ref = useFadeUp()
 
   return (
-    <section id="about" className="max-w-[1200px] mx-auto px-6 py-[100px] md:py-[100px] py-[72px]" ref={ref}>
+    <section id="about" className="max-w-[1200px] mx-auto px-6 py-[72px] md:py-[100px]" ref={ref}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
         {/* Image */}
         <div className="relative fade-up">

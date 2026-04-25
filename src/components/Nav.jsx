@@ -18,8 +18,8 @@ export default function Nav() {
       <nav
         className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between transition-all duration-400 ${
           scrolled
-            ? 'bg-espresso/92 backdrop-blur-md border-b border-muted/15 px-10 py-3.5'
-            : 'px-10 py-5'
+            ? 'bg-espresso/92 backdrop-blur-md border-b border-muted/15 px-5 md:px-10 py-3.5'
+            : 'px-5 md:px-10 py-5'
         }`}
       >
         <a href="#hero" className="font-serif text-2xl tracking-wide text-cream no-underline">
